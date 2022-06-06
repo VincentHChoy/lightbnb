@@ -1,4 +1,3 @@
-const properties = require("./json/properties.json");
 const { Pool } = require("pg");
 
 const pool = new Pool({
@@ -92,8 +91,9 @@ const getAllReservations = function (guest_id, limit = 10) {
        WHERE reservations.guest_id = $1
        GROUP BY properties.id, reservations.id
        ORDER BY reservations.start_date
+       LIMIT $2
        ;`,
-      [guest_id]
+      [guest_id, limit]
     )
     .then((result) => {
       // console.log(result.rows);
