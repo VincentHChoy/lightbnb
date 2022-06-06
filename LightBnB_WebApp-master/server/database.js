@@ -40,7 +40,7 @@ const getUserWithId = function (id) {
   return pool
     .query(`SELECT * FROM users WHERE id =$1;`, [id])
     .then((result) => {
-      console.log("get user email", result.rows[0]);
+      // console.log("get user email", result.rows[0]);
       return result.rows[0];
     })
     .catch((err) => {
@@ -62,7 +62,7 @@ const addUser = function (user) {
       [user.name, user.email, user.password]
     )
     .then((result) => {
-      console.log(result.rows[0]);
+      // console.log(result.rows[0]);
       return result.rows[0];
     })
     .catch((err) => {
@@ -80,8 +80,6 @@ exports.addUser = addUser;
  * @return {Promise<[{}]>} A promise to the reservations.
  */
 const getAllReservations = function (guest_id, limit = 10) {
-  // console.log(getAllProperties(null, 2));
-  // return getAllProperties(null, 2);
   return pool
     .query(
       `SELECT properties.*, reservations.start_date,reservations.end_date
@@ -115,16 +113,16 @@ exports.getAllReservations = getAllReservations;
  * @return {Promise<[{}]>}  A promise to the properties.
  */
 const getAllProperties = (options, limit = 10) => {
-  // 1
+  // Setup an array to hold any parameters that may be available for the query.
   const queryParams = [];
-  // 2
+  // Start the query with all information that comes before the WHERE clause.
   let queryString = `
   SELECT properties.*, avg(property_reviews.rating) as average_rating
   FROM properties
   JOIN property_reviews ON properties.id = property_id
   WHERE 1=1`;
 
-  // 3
+  // Check if a city has been passed in as an option. Add the city to the params array and create a WHERE clause for the city.
   if (options.city) {
     queryParams.push(`%${options.city}%`);
     queryString += `
@@ -141,38 +139,38 @@ const getAllProperties = (options, limit = 10) => {
     queryParams.push(`${options.minimum_price_per_night * 100}`);
     queryParams.push(`${options.maximum_price_per_night * 100}`);
     queryString += `
-    AND cost_per_night BETWEEN $${queryParams.length - 1} AND $${queryParams.length}`;
-
+    AND cost_per_night BETWEEN $${queryParams.length - 1} AND $${
+      queryParams.length
+    }`;
   } else if (options.minimum_price_per_night) {
     queryParams.push(`${options.minimum_price_per_night * 100}`);
     queryString += `
     AND cost_per_night > $${queryParams.length} `;
-    
   } else if (options.maximum_price_per_night) {
     queryParams.push(`${options.maximum_price_per_night * 100}`);
     queryString += `
     AND cost_per_night < $${queryParams.length} `;
   }
 
-  // 4
+  // Add any query that comes after the WHERE clause.
   queryString += `
   GROUP BY properties.id`;
-  
+
   if (options.minimum_rating) {
     queryParams.push(`${options.minimum_rating}`);
     queryString += `
     HAVING avg(property_reviews.rating) >= $${queryParams.length} `;
   }
-  
+
   queryParams.push(limit);
   queryString += `
   ORDER BY cost_per_night
   LIMIT $${queryParams.length};`;
 
   // 5
-  console.log(queryString, queryParams);
+  // console.log(queryString, queryParams);
 
-  // 6
+  // Run the query.
   return pool
     .query(queryString, queryParams)
     .then((res) => res.rows)
@@ -196,11 +194,11 @@ const addProperty = function (property) {
       [property.title, property.description, property.owner_id, property.cover_photo_url, property.thumbnail_photo_url, property.cost_per_night, property.parking_spaces, property.number_of_bathrooms, property.number_of_bedrooms , property.province, property.city, property.country, property.street, property.post_code]
     )
     .then((result) => {
-      console.log(result.rows[0]);
+      // console.log(result.rows[0]);
       return result.rows[0];
     })
     .catch((err) => {
-      console.log(err.message);
+      // console.log(err.message);
       return null;
     });
 };
